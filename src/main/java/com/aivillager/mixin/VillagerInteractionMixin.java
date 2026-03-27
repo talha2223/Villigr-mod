@@ -16,7 +16,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.lang.reflect.Field;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -77,7 +76,7 @@ public class VillagerInteractionMixin {
                             }
                         });
 
-                        // TTS
+                        // Play villager sound
                         TtsBridge.speak(cleanResponse, villager);
                     }
                 } catch (Exception e) {
@@ -97,7 +96,6 @@ public class VillagerInteractionMixin {
 
     /**
      * Execute the parsed action from the AI response.
-     * Uses reflection to access the protected goalSelector field.
      */
     private void executeAction(VillagerEntity villager, ServerPlayerEntity player, String action, String name) {
         switch (action.toUpperCase()) {
