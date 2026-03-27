@@ -10,15 +10,13 @@
   "icon": "assets/aivillager/icon.png",
   "environment": "*",
   "entrypoints": {
-    "main": ["com.aivillager.AiVillagerMod"],
-    "client": ["com.aivillager.voice.VoiceChatClient"]
+    "main": ["com.aivillager.AiVillagerMod"]
   },
   "mixins": [
     "aivillager.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=0.14.0",
-    "fabric": ">=0.42.0",
     "minecraft": "1.16.x"
   }
 }
