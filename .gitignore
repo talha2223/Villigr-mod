@@ -1,23 +1,4 @@
-# Gradle
 .gradle/
 build/
-!gradle/wrapper/gradle-wrapper.jar
-
-# IDE
-.idea/
-*.iml
-.vscode/
-*.swp
-*.swo
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Config with API keys - DO NOT COMMIT
-config/aivillager.json
-
-# Gradle wrapper (re-downloadable)
-gradlew
-gradlew.bat
-gradle/wrapper/gradle-wrapper.jar
+config/
+*.class
