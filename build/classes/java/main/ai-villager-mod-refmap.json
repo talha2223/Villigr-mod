@@ -1,0 +1,14 @@
+{
+  "mappings": {
+    "com/aivillager/mixin/VillagerInteractionMixin": {
+      "interactMob": "Lnet/minecraft/class_1646;method_5992(Lnet/minecraft/class_1657;Lnet/minecraft/class_1268;)Lnet/minecraft/class_1269;"
+    }
+  },
+  "data": {
+    "named:intermediary": {
+      "com/aivillager/mixin/VillagerInteractionMixin": {
+        "interactMob": "Lnet/minecraft/class_1646;method_5992(Lnet/minecraft/class_1657;Lnet/minecraft/class_1268;)Lnet/minecraft/class_1269;"
+      }
+    }
+  }
+}

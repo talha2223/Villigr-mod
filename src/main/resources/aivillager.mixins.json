@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "package": "com.aivillager.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+    "VillagerNameMixin",
+    "VillagerInteractionMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

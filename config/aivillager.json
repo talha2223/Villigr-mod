@@ -1,0 +1,6 @@
+{
+  "apiKey": "AIzaSyAFNTLb5WLnDaW-M8S4bWrmEbuG0AFoK9Y",
+  "geminiModel": "gemini-2.0-flash",
+  "ttsServerUrl": "http://localhost:5000/tts",
+  "ttsEnabled": true
+}

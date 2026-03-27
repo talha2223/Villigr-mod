@@ -1,0 +1,53 @@
+plugins {
+    id 'fabric-loom' version '0.12-SNAPSHOT'
+    id 'java'
+}
+
+version = "1.0.0"
+group = "com.aivillager"
+
+archivesBaseName = "ai-villager-mod"
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Minecraft 1.16.5
+    minecraft "com.mojang:minecraft:1.16.5"
+    mappings "net.fabricmc:yarn:1.16.5+build.9:v2"
+    modImplementation "net.fabricmc:fabric-loader:0.14.22"
+
+    // Fabric API
+    modImplementation "net.fabricmc.fabric-api:fabric-api:0.42.0+1.16"
+
+    // HTTP requests (OkHttp)
+    include(implementation("com.squareup.okhttp3:okhttp:4.12.0"))
+    include(implementation("com.squareup.okio:okio:3.6.0"))
+
+    // JSON parsing (Gson) - already included with Minecraft, but declare it
+    implementation("com.google.code.gson:gson:2.10.1")
+}
+
+processResources {
+    inputs.property "version", project.version
+
+    filesMatching("fabric.mod.json") {
+        expand "version": project.version
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = "UTF-8"
+}
+
+jar {
+    from("LICENSE") {
+        rename { "${it}_${project.archivesBaseName}" }
+    }
+}

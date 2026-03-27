@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "id": "aivillager",
+  "version": "${version}",
+  "name": "AI Villager Mod",
+  "description": "AI-powered villagers with Roman Urdu personality via Google Gemini API",
+  "authors": ["AI Villager Team"],
+  "contact": {},
+  "license": "MIT",
+  "icon": "assets/aivillager/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": ["com.aivillager.AiVillagerMod"],
+    "client": ["com.aivillager.voice.VoiceChatClient"]
+  },
+  "mixins": [
+    "aivillager.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.14.0",
+    "fabric": ">=0.42.0",
+    "minecraft": "1.16.x"
+  }
+}
