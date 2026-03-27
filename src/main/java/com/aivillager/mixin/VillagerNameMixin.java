@@ -27,21 +27,25 @@ public class VillagerNameMixin {
     };
 
     private static final Random RANDOM = new Random();
+    private boolean aivillager$nameAssigned = false;
 
     /**
-     * Injects into the villager's init method to assign a random name.
+     * Injects into the villager's tick method to assign a random name on first tick.
+     * This is reliable because tick() is guaranteed to exist on all LivingEntity subclasses.
      */
-    @Inject(method = "initGoals", at = @At("TAIL"))
-    private void onInit(CallbackInfo ci) {
+    @Inject(method = "tick", at = @At("HEAD"))
+    private void onTick(CallbackInfo ci) {
+        if (aivillager$nameAssigned) return;
+
         VillagerEntity villager = (VillagerEntity) (Object) this;
 
         // Only assign name if the villager doesn't already have one
-        if (villager.hasCustomName()) {
-            return;
+        if (!villager.hasCustomName()) {
+            String name = VILLAGER_NAMES[RANDOM.nextInt(VILLAGER_NAMES.length)];
+            villager.setCustomName(new LiteralText(name));
+            villager.setCustomNameVisible(true);
         }
 
-        String name = VILLAGER_NAMES[RANDOM.nextInt(VILLAGER_NAMES.length)];
-        villager.setCustomName(new LiteralText(name));
-        villager.setCustomNameVisible(true);
+        aivillager$nameAssigned = true;
     }
 }
