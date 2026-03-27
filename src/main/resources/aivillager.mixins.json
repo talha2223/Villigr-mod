@@ -4,7 +4,8 @@
   "compatibilityLevel": "JAVA_8",
   "mixins": [
     "VillagerNameMixin",
-    "VillagerInteractionMixin"
+    "VillagerInteractionMixin",
+    "ChatListenerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

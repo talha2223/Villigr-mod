@@ -16,14 +16,21 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CompletableFuture;
 
 /**
  * Mixin that intercepts player interaction with villagers.
- * When a player right-clicks a villager, it triggers the AI conversation.
+ * When a player right-clicks a villager, it sets that villager as "active"
+ * and the player's next chat messages go to the AI.
  */
 @Mixin(VillagerEntity.class)
 public class VillagerInteractionMixin {
+
+    // Track which player is talking to which villager
+    public static final Map<UUID, VillagerEntity> ACTIVE_CONVERSATIONS = new ConcurrentHashMap<>();
 
     @Inject(method = "interactMob", at = @At("HEAD"), cancellable = true)
     private void onInteract(PlayerEntity player, Hand hand, CallbackInfoReturnable<ActionResult> cir) {
@@ -34,7 +41,7 @@ public class VillagerInteractionMixin {
             return;
         }
 
-        // Sneak + right-click = vanilla trading (so players can still trade)
+        // Sneak + right-click = vanilla trading
         if (player.isSneaking()) {
             return;
         }
@@ -44,60 +51,98 @@ public class VillagerInteractionMixin {
                 : "Ghaib Villager";
 
         if (player instanceof ServerPlayerEntity) {
-            final ServerPlayerEntity serverPlayer = (ServerPlayerEntity) player;
+            ServerPlayerEntity serverPlayer = (ServerPlayerEntity) player;
 
-            // Send prompt message to player's chat
+            // Set this villager as the active conversation for this player
+            ACTIVE_CONVERSATIONS.put(player.getUuid(), villager);
+
+            // Send prompt message
             serverPlayer.sendMessage(
                     new LiteralText("\u00a7e[" + villagerName + "] \u00a7fBhai, kya haal hai? Chat mein kuch bolo!"),
                     false
             );
 
-            // For demonstration, trigger a sample conversation
-            final String playerMessage = "Kya haal hai?";
-
-            // Call Gemini API asynchronously
-            CompletableFuture.runAsync(() -> {
-                try {
-                    String response = GeminiApiHandler.generateResponse(villagerName, playerMessage);
-
-                    if (response != null) {
-                        final String cleanResponse = ActionParser.extractMessage(response);
-                        final String action = ActionParser.extractAction(response);
-
-                        // Execute on main thread
-                        serverPlayer.server.execute(() -> {
-                            serverPlayer.sendMessage(
-                                    new LiteralText("\u00a7e[" + villagerName + "] \u00a7f" + cleanResponse),
-                                    false
-                            );
-
-                            if (action != null) {
-                                executeAction(villager, serverPlayer, action, villagerName);
-                            }
-                        });
-
-                        // Play villager sound
-                        TtsBridge.speak(cleanResponse, villager);
-                    }
-                } catch (Exception e) {
-                    serverPlayer.server.execute(() -> {
-                        serverPlayer.sendMessage(
-                                new LiteralText("\u00a7c[" + villagerName + "] \u00a74Arrey yaar, kuch ghalti ho gayi! (API Error)"),
-                                false
-                        );
-                    });
-                }
-            });
+            // Play villager ambient sound
+            villager.world.playSound(
+                    null,
+                    villager.getBlockPos(),
+                    net.minecraft.sound.SoundEvents.ENTITY_VILLAGER_AMBIENT,
+                    net.minecraft.sound.SoundCategory.NEUTRAL,
+                    1.0F,
+                    0.8F + (float)(Math.random() * 0.4)
+            );
         }
 
-        // Cancel the default behavior (no trade GUI)
+        // Cancel vanilla behavior
         cir.setReturnValue(ActionResult.CONSUME);
+    }
+
+    /**
+     * Called from ChatListenerMixin when a player sends a chat message
+     * while in an active conversation with a villager.
+     */
+    public static void handlePlayerChat(ServerPlayerEntity player, String message) {
+        VillagerEntity villager = ACTIVE_CONVERSATIONS.get(player.getUuid());
+
+        if (villager == null || !villager.isAlive()) {
+            ACTIVE_CONVERSATIONS.remove(player.getUuid());
+            return;
+        }
+
+        final String villagerName = villager.hasCustomName()
+                ? villager.getName().getString()
+                : "Ghaib Villager";
+
+        // Call Gemini API asynchronously
+        CompletableFuture.runAsync(() -> {
+            try {
+                String response = GeminiApiHandler.generateResponse(villagerName, message);
+
+                if (response != null) {
+                    final String cleanResponse = ActionParser.extractMessage(response);
+                    final String action = ActionParser.extractAction(response);
+
+                    // Execute on main thread
+                    player.server.execute(() -> {
+                        player.sendMessage(
+                                new LiteralText("\u00a7e[" + villagerName + "] \u00a7f" + cleanResponse),
+                                false
+                        );
+
+                        // Play sound
+                        villager.world.playSound(
+                                null,
+                                villager.getBlockPos(),
+                                net.minecraft.sound.SoundEvents.ENTITY_VILLAGER_AMBIENT,
+                                net.minecraft.sound.SoundCategory.NEUTRAL,
+                                1.0F,
+                                0.9F + (float)(Math.random() * 0.2)
+                        );
+
+                        if (action != null) {
+                            executeAction(villager, player, action, villagerName);
+                        }
+                    });
+
+                    // TTS
+                    TtsBridge.speak(cleanResponse, villager);
+                }
+            } catch (Exception e) {
+                player.server.execute(() -> {
+                    player.sendMessage(
+                            new LiteralText("\u00a7c[" + villagerName + "] \u00a74Arrey yaar, kuch ghalti ho gayi!"),
+                            false
+                    );
+                });
+                AiVillagerMod.LOGGER.error("[AI Villager] Gemini error: " + e.getMessage());
+            }
+        });
     }
 
     /**
      * Execute the parsed action from the AI response.
      */
-    private void executeAction(VillagerEntity villager, ServerPlayerEntity player, String action, String name) {
+    private static void executeAction(VillagerEntity villager, ServerPlayerEntity player, String action, String name) {
         switch (action.toUpperCase()) {
             case "FOLLOW":
                 player.sendMessage(
@@ -111,7 +156,6 @@ public class VillagerInteractionMixin {
                         new LiteralText("\u00a7a[" + name + "] \u00a72Fikar na karo, main tumhe bachaunga!"),
                         false
                 );
-                // Boost villager's combat stats
                 try {
                     villager.getAttributes()
                             .getCustomInstance(EntityAttributes.GENERIC_MAX_HEALTH)
@@ -131,6 +175,13 @@ public class VillagerInteractionMixin {
             case "TRADE":
                 player.sendMessage(
                         new LiteralText("\u00a7a[" + name + "] \u00a72Aao, sauda karte hain!"),
+                        false
+                );
+                break;
+
+            case "FLEE":
+                player.sendMessage(
+                        new LiteralText("\u00a7c[" + name + "] \u00a74Bachao bachao! Bhagooo!"),
                         false
                 );
                 break;
