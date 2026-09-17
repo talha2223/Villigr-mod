@@ -4,6 +4,12 @@ public class ActionParser {
     public static com.google.gson.JsonObject parseJsonResponse(String jsonResponse) {
         if (jsonResponse == null || jsonResponse.trim().isEmpty()) return null;
         try {
+            // Find the first { and the last } to handle markdown blocks around JSON
+            int start = jsonResponse.indexOf('{');
+            int end = jsonResponse.lastIndexOf('}');
+            if (start != -1 && end != -1 && start < end) {
+                jsonResponse = jsonResponse.substring(start, end + 1);
+            }
             return com.google.gson.JsonParser.parseString(jsonResponse).getAsJsonObject();
         } catch (Exception e) {
             com.aivillager.AiVillagerMod.LOGGER.error("[AI Villager] Failed to parse JSON response: " + e.getMessage());
