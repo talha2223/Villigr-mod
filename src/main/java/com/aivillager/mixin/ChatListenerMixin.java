@@ -24,7 +24,7 @@ public class ChatListenerMixin {
                 player.sendMessage(Text.literal("\u00a7e[Villager] \u00a7fAlvida bhai! Phir milenge!"), false);
                 return;
             }
-            VillagerInteractionMixin.handlePlayerChat(player, message);
+            com.aivillager.api.ConversationManager.handlePlayerChat(player, message);
         }
     }
 }
