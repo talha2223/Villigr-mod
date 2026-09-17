@@ -14,6 +14,7 @@ public class AiVillagerMod implements ModInitializer {
     public void onInitialize() {
         LOGGER.info("[AI Villager] Mod loading started...");
         ModConfig.load();
+        com.aivillager.api.CommandRegistry.register();
         LOGGER.info("[AI Villager] Config loaded. API key configured: " + (ModConfig.getApiKey() != null && !ModConfig.getApiKey().isEmpty()));
         LOGGER.info("[AI Villager] Mod loaded successfully! Villagers are getting smarter...");
         LOGGER.info("[AI Villager] Companion App: Run companion-app/main.py for voice AI");

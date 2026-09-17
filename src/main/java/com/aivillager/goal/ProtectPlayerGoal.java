@@ -78,7 +78,7 @@ public class ProtectPlayerGoal extends Goal {
             // Attack if within range
             double distance = villager.squaredDistanceTo(nearestHostile);
             if (distance < 4.0) { // Within 2 blocks
-                villager.tryAttack(nearestHostile);
+                villager.tryAttack((net.minecraft.server.world.ServerWorld)villager.getWorld(), nearestHostile);
             }
         } else {
             // No hostile mobs nearby, return to player
@@ -86,7 +86,7 @@ public class ProtectPlayerGoal extends Goal {
                 villager.getNavigation().startMovingTo(playerToProtect, 1.0);
             } else {
                 villager.getNavigation().stop();
-                villager.getLookControl().lookAt(playerToProtect, 10.0F, (float) villager.getLookPitchSpeed());
+                villager.getLookControl().lookAt(playerToProtect, 10.0F, (float) villager.getMaxLookPitchChange());
             }
         }
     }
@@ -95,7 +95,7 @@ public class ProtectPlayerGoal extends Goal {
      * Finds the nearest hostile entity that is targeting the protected player.
      */
     private HostileEntity findNearestHostile() {
-        List<HostileEntity> hostiles = villager.world.getEntitiesByClass(
+        List<HostileEntity> hostiles = villager.getWorld().getEntitiesByClass(
                 HostileEntity.class,
                 villager.getBoundingBox().expand(16.0),
                 mob -> mob.isAlive() && (mob.getTarget() == playerToProtect || mob.squaredDistanceTo(playerToProtect) < 64.0)

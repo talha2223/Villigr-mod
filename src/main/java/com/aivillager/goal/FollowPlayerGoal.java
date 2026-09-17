@@ -56,7 +56,7 @@ public class FollowPlayerGoal extends Goal {
     @Override
     public void tick() {
         // Look at the player
-        villager.getLookControl().lookAt(targetPlayer, 10.0F, (float) villager.getLookPitchSpeed());
+        villager.getLookControl().lookAt(targetPlayer, 10.0F, (float) villager.getMaxLookPitchChange());
 
         // Update path every 10 ticks
         if (--updateCountdownTicks <= 0) {

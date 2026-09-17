@@ -1,30 +1,34 @@
 plugins {
-    id 'fabric-loom' version '0.12-SNAPSHOT'
-    id 'java'
+    id 'fabric-loom' version '1.10-SNAPSHOT'
+    id 'maven-publish'
 }
 
-version = "1.0.0"
-group = "com.aivillager"
+version = project.mod_version
+group = project.maven_group
 
-archivesBaseName = "ai-villager-mod"
-
-java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+base {
+    archivesName = project.archives_base_name
 }
 
 repositories {
     mavenCentral()
+    maven {
+        name = "Modrinth"
+        url = "https://api.modrinth.com/maven"
+        content {
+            includeGroup "maven.modrinth"
+        }
+    }
 }
 
 dependencies {
-    // Minecraft 1.16.5
-    minecraft "com.mojang:minecraft:1.16.5"
-    mappings "net.fabricmc:yarn:1.16.5+build.9:v2"
-    modImplementation "net.fabricmc:fabric-loader:0.14.22"
+    // To change the versions see the gradle.properties file
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    mappings "net.fabricmc:yarn:${project.yarn_mappings}"
+    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
-    // Fabric API
-    modImplementation "net.fabricmc.fabric-api:fabric-api:0.42.0+1.16"
+    // Fabric API. This is technically optional, but you probably want it anyway.
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
     // HTTP requests (OkHttp)
     include(implementation("com.squareup.okhttp3:okhttp:4.12.0"))
@@ -43,11 +47,17 @@ processResources {
 }
 
 tasks.withType(JavaCompile).configureEach {
-    options.encoding = "UTF-8"
+    it.options.release = 21
+}
+
+java {
+    withSourcesJar()
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
 }
 
 jar {
     from("LICENSE") {
-        rename { "${it}_${project.archivesBaseName}" }
+        rename { "${it}_${project.base.archivesName.get()}"}
     }
 }

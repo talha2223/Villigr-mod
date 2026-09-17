@@ -1,11 +1,12 @@
 {
   "required": true,
   "package": "com.aivillager.mixin",
-  "compatibilityLevel": "JAVA_8",
+  "compatibilityLevel": "JAVA_21",
   "mixins": [
     "VillagerNameMixin",
     "VillagerInteractionMixin",
-    "ChatListenerMixin"
+    "ChatListenerMixin",
+    "VillagerGoalAccessor"
   ],
   "injectors": {
     "defaultRequire": 1
