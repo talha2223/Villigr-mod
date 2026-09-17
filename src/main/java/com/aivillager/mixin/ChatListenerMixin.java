@@ -18,9 +18,9 @@ public class ChatListenerMixin {
     @Inject(method = "onChatMessage", at = @At("HEAD"))
     private void onChatMessage(net.minecraft.network.packet.c2s.play.ChatMessageC2SPacket packet, CallbackInfo ci) {
         String message = packet.chatMessage();
-        if (VillagerInteractionMixin.ACTIVE_CONVERSATIONS.containsKey(player.getUuid())) {
+        if (com.aivillager.api.ConversationManager.ACTIVE_CONVERSATIONS.containsKey(player.getUuid())) {
             if (message.equalsIgnoreCase("bye") || message.equalsIgnoreCase("alvida") || message.equalsIgnoreCase("band karo")) {
-                VillagerInteractionMixin.ACTIVE_CONVERSATIONS.remove(player.getUuid());
+                com.aivillager.api.ConversationManager.ACTIVE_CONVERSATIONS.remove(player.getUuid());
                 player.sendMessage(Text.literal("\u00a7e[Villager] \u00a7fAlvida bhai! Phir milenge!"), false);
                 return;
             }
