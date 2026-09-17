@@ -5,7 +5,8 @@
   "mixins": [
     "VillagerNameMixin",
     "VillagerInteractionMixin",
-    "ChatListenerMixin"
+    "ChatListenerMixin",
+    "VillagerGoalAccessor"
   ],
   "injectors": {
     "defaultRequire": 1
